@@ -6,13 +6,14 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import java.util.Random;
 
 public class MainActivity extends AppWidgetProvider {
-    
+
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -24,26 +25,27 @@ public class MainActivity extends AppWidgetProvider {
 
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
                     R.layout.activity_main);
-//            remoteViews.setTextViewText(R.id.textView, number);
-
-
-//            Intent intent = new Intent(context, MainActivity.class);
-//            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-//            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
-//            PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-//                    0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             PackageManager pm = context.getPackageManager();
             Intent launchIntent = pm.getLaunchIntentForPackage("com.shohoz.launch.consumer");
-            context.startActivity(launchIntent);
-            if (launchIntent != null) {
-                context.startActivity(launchIntent);
-            } else {
-                Toast.makeText(context, "Package not found", Toast.LENGTH_SHORT).show();
+            if(launchIntent==null){
+                launchIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.shohoz.launch.consumer"));
+            }else{
+                launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             }
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
+            PendingIntent pendingIntent = PendingIntent.getActivity(context,
                     0, launchIntent, 0);
-            remoteViews.setOnClickPendingIntent(R.id.imageViewBus, pendingIntent);
+            remoteViews.setOnClickPendingIntent(R.id.imageViewLaunch, pendingIntent);
+
+            Intent busIntent = pm.getLaunchIntentForPackage("com.shohoz.bus.android");
+            if(busIntent==null){
+                busIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.shohoz.bus.android"));
+            }else{
+                busIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            }
+            PendingIntent pendingIntent2 = PendingIntent.getActivity(context,
+                    0, busIntent, 0);
+            remoteViews.setOnClickPendingIntent(R.id.imageViewBus, pendingIntent2);
 
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
         }
